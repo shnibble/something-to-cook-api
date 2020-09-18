@@ -42,6 +42,6 @@ const deploy = () => {
     })
 }
 
-app.get('/', (req, res) => res.send('Something to Cook API version:', version))
+app.get('/', (req, res) => res.send(`Something to Cook API version: version`))
 
 app.listen(port, () => console.log(`Something to Cook API version ${version} is listening on port ${port}.`))
