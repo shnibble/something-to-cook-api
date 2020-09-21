@@ -8,9 +8,10 @@ const port = 3000
 const version = process.env.npm_package_version || 'unknown'
 
 // controllers
+const userController = require('./controllers/user')
 
 // initialize db connection
-// const connection = require('./db/connect')
+const connection = require('./db/connect')
 
 // initialize github webhook
 const GithubWebHook = require('express-github-webhook')
@@ -19,7 +20,9 @@ const webhookHandler = GithubWebHook({ path: '/webhooks/github', secret: GITHUB_
 // initialize express
 const app = express()
 app.use(cors())
-app.use(bodyParser.urlencoded())
+app.use(bodyParser.urlencoded({
+    extended: true
+}))
 app.use(bodyParser.json())
 app.use(webhookHandler)
 
@@ -43,5 +46,8 @@ const deploy = () => {
 }
 
 app.get('/', (req, res) => res.send(`Something to Cook API version ${version}`))
+app.post('/user/register', (req, res) => userController.register(req, res, connection))
+app.post('/user/login', (req, res) => userController.login(req, res, connection))
+app.post('/user/reset', (req, res) => userController.reset(req, res))
 
 app.listen(port, () => console.log(`Something to Cook API version ${version} is listening on port ${port}.`))
