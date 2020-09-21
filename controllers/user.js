@@ -115,11 +115,9 @@ const reset = (req, res) => {
 
             let transporter = nodemailer.createTransport({
                 host: 'localhost',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASSWORD
+                port: 25,
+                tls: {
+                    rejectUnauthorized: false
                 }
             })
 
@@ -132,9 +130,11 @@ const reset = (req, res) => {
 
             }, (error, info) => {
                 if (error) {
-                    return console.log(error);
+                    res.status(400).send('Bad request.')
+                    return console.log(error)
                 }
                 console.log('Message %s sent: %s', info.messageId, info.response);
+                res.status(200).send('Success.')
             })
         }
     }
