@@ -114,7 +114,7 @@ const reset = (req, res) => {
         } else {
 
             let transporter = nodemailer.createTransport({
-                host: 'somethingtocook-api.com',
+                host: 'localhost',
                 port: 25,
                 secure: false,
                 auth: {
