@@ -114,10 +114,10 @@ const reset = (req, res) => {
         } else {
 
             let transporter = nodemailer.createTransport({
-                host: 'localhost',
-                port: 25,
-                tls: {
-                    rejectUnauthorized: false
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASSWORD
                 }
             })
 
