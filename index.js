@@ -56,5 +56,7 @@ app.post('/user/update/password', (req, res) => userController.updatePassword(re
 app.post('/admin/get/users', (req, res) => adminController.getUsers(req, res, connection))
 app.post('/admin/user/promote', (req, res) => adminController.promoteUser(req, res, connection))
 app.post('/admin/user/demote', (req, res) => adminController.demoteUser(req, res, connection))
+app.post('/admin/user/ban', (req, res) => adminController.banUser(req, res, connection))
+app.post('/admin/user/unban', (req, res) => adminController.unbanUser(req, res, connection))
 
 app.listen(port, () => console.log(`Something to Cook API version ${version} is listening on port ${port}.`))

@@ -90,7 +90,7 @@ const login = (req, res, connection) => {
     } else {
 
         // get user
-        connection.execute('SELECT id, username, email, password, security FROM users WHERE email = ?', [email], (err, results, fields) => {
+        connection.execute('SELECT id, username, email, password, security, banned FROM users WHERE email = ?', [email], (err, results, fields) => {
             if (err) {
                 console.log('Login rejected: server error.')
                 console.error(err)
@@ -98,6 +98,8 @@ const login = (req, res, connection) => {
             } else if (!results.length) {
                 console.log('Login rejected: invalid email.')
                 res.status(400).json({'error':'Invalid email or password.'})
+            } else if (results[0].banned) {
+                res.status(403).json({'error':'Banned account.'})            
             } else {
                 const user = results[0]
 
