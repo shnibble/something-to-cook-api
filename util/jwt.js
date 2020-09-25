@@ -4,7 +4,7 @@ const secret = process.env.JWT_SECRET
 const create = (claims) => {
 
     // set expiration date to 30 days
-    const expires = new Date().getTime() + 2592000000
+    const expires = new Date().getTime() + 604800000
     const jwt_token = nJwt.create(claims, secret)
     jwt_token.setExpiration(expires)
 

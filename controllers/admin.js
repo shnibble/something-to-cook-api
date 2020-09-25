@@ -12,33 +12,39 @@ const getUsers = (req, res, connection) => {
         // verify token
         JWT.verify(jwt)
         .then((jwtData) => {
-            const user = jwtData.body
 
             // verify security
-            if (user.security < 2) {
-                res.status(403).json({'error':'Forbidden.'})
-            } else {
-
-                if (security === 'all') {
-                    connection.query('SELECT id, username, email, security FROM users ORDER BY security DESC, username', (err, results) => {
-                        if (err) {
-                            console.error(err)
-                            res.status(500).json({'error':'Server error.'})
-                        } else {
-                            res.status(200).json(results)
-                        }
-                    })
+            connection.execute('SELECT security FROM users WHERE id = ?', [jwtData.body.id], (err, results) => {
+                if (err) {
+                    console.error(err)
+                    res.status(500).json({'error':'Server error.'})
+                } else if (!results.length) {
+                    res.status(400).json({ 'error':'User does not exist.'})
+                } else if (results[0].security < 2) {
+                    res.status(403).json({'error':'Forbidden.'})
                 } else {
-                    connection.execute('SELECT id, username, email, security FROM users WHERE security = ? ORDER BY security DESC, username', [security], (err, results) => {
-                        if (err) {
-                            console.error(err)
-                            res.status(500).json({'error':'Server error.'})
-                        } else {
-                            res.status(200).json(results)
-                        }
-                    })
+
+                    if (security === 'all') {
+                        connection.query('SELECT id, username, email, security FROM users ORDER BY security DESC, username', (err, results) => {
+                            if (err) {
+                                console.error(err)
+                                res.status(500).json({'error':'Server error.'})
+                            } else {
+                                res.status(200).json(results)
+                            }
+                        })
+                    } else {
+                        connection.execute('SELECT id, username, email, security FROM users WHERE security = ? ORDER BY security DESC, username', [security], (err, results) => {
+                            if (err) {
+                                console.error(err)
+                                res.status(500).json({'error':'Server error.'})
+                            } else {
+                                res.status(200).json(results)
+                            }
+                        })
+                    }
                 }
-            }
+            })
         })
         .catch(err => {
             res.status(400).json({'error':'Invalid token.'})
@@ -58,8 +64,7 @@ const promoteUser = (req, res, connection) => {
         // verify token
         JWT.verify(jwt)
         .then((jwtData) => {
-            const user = jwtData.body
-                
+                            
             // verify user exists
             connection.execute('SELECT security FROM users WHERE id = ?', [user_id], (err, results) => {
                 if (err) {
@@ -72,20 +77,28 @@ const promoteUser = (req, res, connection) => {
                     // verify security
                     const current_user_security = results[0].security
                     const new_user_security = current_user_security + 1
-                    if (user.security < 2 || user.security <= current_user_security) {
-                        res.status(403).json({'error':'Forbidden.'})
-                    } else {
 
-                        // promote user
-                        connection.execute('UPDATE users SET security = ? WHERE id = ?', [new_user_security, user_id], (err) => {
-                            if (err) {
-                                console.error(err)
-                                res.status(500).json({'error':'Server error.'})
-                            } else {
-                                res.status(200).send('Success.')
-                            }
-                        })
-                    }
+                    connection.execute('SELECT security FROM users WHERE id = ?', [jwtData.body.id], (err, results) => {
+                        if (err) {
+                            console.error(err)
+                            res.status(500).json({'error':'Server error.'})
+                        } else if (!results.length) {
+                            res.status(400).json({ 'error':'User does not exist.'})
+                        } else if (results[0].security < 2 || results[0].security <= current_user_security) {
+                            res.status(403).json({'error':'Forbidden.'})
+                        } else {
+
+                            // promote user
+                            connection.execute('UPDATE users SET security = ? WHERE id = ?', [new_user_security, user_id], (err) => {
+                                if (err) {
+                                    console.error(err)
+                                    res.status(500).json({'error':'Server error.'})
+                                } else {
+                                    res.status(200).send('Success.')
+                                }
+                            })
+                        }
+                    })
                 }
             })
         })
@@ -103,11 +116,10 @@ const demoteUser = (req, res, connection) => {
     if (typeof jwt === 'undefined' || typeof user_id === 'undefined') {
         res.status(400).json({ 'error':'Missing parameters.'})
     } else {
-
+        
         // verify token
         JWT.verify(jwt)
         .then((jwtData) => {
-            const user = jwtData.body
                 
             // verify user exists
             connection.execute('SELECT security FROM users WHERE id = ?', [user_id], (err, results) => {
@@ -122,20 +134,27 @@ const demoteUser = (req, res, connection) => {
                     const current_user_security = results[0].security
                     const new_user_security = current_user_security - 1
 
-                    if (new_user_security === -1 || user.security < 2 || user.security <= current_user_security) {
-                        res.status(403).json({'error':'Forbidden.'})
-                    } else {
+                    connection.execute('SELECT security FROM users WHERE id = ?', [jwtData.body.id], (err, results) => {
+                        if (err) {
+                            console.error(err)
+                            res.status(500).json({'error':'Server error.'})
+                        } else if (!results.length) {
+                            res.status(400).json({ 'error':'User does not exist.'})
+                        } else if (new_user_security === -1 || results[0].security < 2 || results[0].security <= current_user_security) {
+                            res.status(403).json({'error':'Forbidden.'})
+                        } else {
 
-                        // demote user
-                        connection.execute('UPDATE users SET security = ? WHERE id = ?', [new_user_security, user_id], (err) => {
-                            if (err) {
-                                console.error(err)
-                                res.status(500).json({'error':'Server error.'})
-                            } else {
-                                res.status(200).send('Success.')
-                            }
-                        })
-                    }
+                            // demote user
+                            connection.execute('UPDATE users SET security = ? WHERE id = ?', [new_user_security, user_id], (err) => {
+                                if (err) {
+                                    console.error(err)
+                                    res.status(500).json({'error':'Server error.'})
+                                } else {
+                                    res.status(200).send('Success.')
+                                }
+                            })
+                        }
+                    })
                 }
             })
         })
