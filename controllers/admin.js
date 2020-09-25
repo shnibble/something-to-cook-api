@@ -122,7 +122,7 @@ const demoteUser = (req, res, connection) => {
                     const current_user_security = results[0].security
                     const new_user_security = current_user_security - 1
 
-                    if (new_user_security === 0 || user.security < 2 || user.security <= current_user_security) {
+                    if (new_user_security === -1 || user.security < 2 || user.security <= current_user_security) {
                         res.status(403).json({'error':'Forbidden.'})
                     } else {
 
