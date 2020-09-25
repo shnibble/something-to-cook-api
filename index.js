@@ -58,5 +58,13 @@ app.post('/admin/user/promote', (req, res) => adminController.promoteUser(req, r
 app.post('/admin/user/demote', (req, res) => adminController.demoteUser(req, res, connection))
 app.post('/admin/user/ban', (req, res) => adminController.banUser(req, res, connection))
 app.post('/admin/user/unban', (req, res) => adminController.unbanUser(req, res, connection))
+app.post('/admin/get/tags', (req, res) => adminController.getTags(req, res, connection))
+app.post('/admin/tag/add', (req, res) => adminController.addTag(req, res, connection))
+app.post('/admin/tag/disable', (req, res) => adminController.disableTag(req, res, connection))
+app.post('/admin/tag/enable', (req, res) => adminController.enableTag(req, res, connection))
+app.post('/admin/get/types', (req, res) => adminController.getTypes(req, res, connection))
+app.post('/admin/type/add', (req, res) => adminController.addType(req, res, connection))
+app.post('/admin/type/disable', (req, res) => adminController.disableType(req, res, connection))
+app.post('/admin/type/enable', (req, res) => adminController.enableType(req, res, connection))
 
 app.listen(port, () => console.log(`Something to Cook API version ${version} is listening on port ${port}.`))
