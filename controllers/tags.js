@@ -25,7 +25,7 @@ const getTags = (req, res, connection) => {
                 } else {
 
                     // get tags
-                    connection.query('SELECT t.*, (SELECT COUNT(*) FROM meal_tags WHERE tag_id = t.id) as count FROM tags t WHERE t.enabled = TRUE ORDER BY t.name', (err, results) => {
+                    connection.query('SELECT t.*, (SELECT COUNT(*) FROM meal_tags WHERE tag_id = t.id AND meal_id IN (SELECT id FROM meals WHERE enabled = TRUE)) as count FROM tags t WHERE t.enabled = TRUE ORDER BY t.name', (err, results) => {
                         if (err) {
                             console.error(err)
                             res.status(500).json({'error':'Server error.'})
