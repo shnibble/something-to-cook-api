@@ -10,6 +10,9 @@ const version = process.env.npm_package_version || 'unknown'
 // controllers
 const userController = require('./controllers/user')
 const adminController = require('./controllers/admin')
+const mealController = require('./controllers/meal')
+const typesController = require('./controllers/types')
+const tagsController = require('./controllers/tags')
 
 // initialize db connection
 const connection = require('./db/connect')
@@ -66,5 +69,20 @@ app.post('/admin/get/types', (req, res) => adminController.getTypes(req, res, co
 app.post('/admin/type/add', (req, res) => adminController.addType(req, res, connection))
 app.post('/admin/type/disable', (req, res) => adminController.disableType(req, res, connection))
 app.post('/admin/type/enable', (req, res) => adminController.enableType(req, res, connection))
+app.post('/admin/get/meals', (req, res) => adminController.getMeals(req, res, connection))
+app.post('/admin/meal/approve', (req, res) => adminController.approveMeal(req, res, connection))
+app.post('/admin/meal/reject', (req, res) => adminController.rejectMeal(req, res, connection))
+app.post('/admin/meal/disable', (req, res) => adminController.disableMeal(req, res, connection))
+app.post('/admin/meal/enable', (req, res) => adminController.enableMeal(req, res, connection))
+app.post('/admin/meal/add/type', (req, res) => adminController.addMealType(req, res, connection))
+app.post('/admin/meal/add/tag', (req, res) => adminController.addMealTag(req, res, connection))
+app.post('/admin/meal/remove/type', (req, res) => adminController.removeMealType(req, res, connection))
+app.post('/admin/meal/remove/tag', (req, res) => adminController.removeMealTag(req, res, connection))
+
+app.post('/meal/add', (req, res) => mealController.addMeal(req, res, connection))
+
+app.post('/types/get', (req, res) => typesController.getTypes(req, res, connection))
+
+app.post('/tags/get', (req, res) => tagsController.getTags(req, res, connection))
 
 app.listen(port, () => console.log(`Something to Cook API version ${version} is listening on port ${port}.`))
