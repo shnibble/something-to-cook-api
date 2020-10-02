@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
+const axios = require('axios')
 const uniqueString = require('unique-string')
 const JWT = require('../util/jwt')
 
@@ -11,11 +12,11 @@ const validateEmail = (email) => {
 const register = (req, res, connection) => {
 
     // validate parameters
-    const { email, username, password, repeat_password } = req.body
+    const { email, username, password, repeat_password, recaptcha_response } = req.body
 
     console.log('Receiving new user registration:', email)
 
-    if (typeof email === 'undefined' || typeof username === 'undefined' || typeof password === 'undefined' || typeof repeat_password === 'undefined') {
+    if (typeof email === 'undefined' || typeof username === 'undefined' || typeof password === 'undefined' || typeof repeat_password === 'undefined' || typeof recaptcha_response === 'undefined') {
         console.log('Registration rejected: missing parameters.')
         res.status(400).json({ 'error':'Missing parameters.'})
     } else {
@@ -54,19 +55,39 @@ const register = (req, res, connection) => {
                                 res.status(400).json({'error':'Username already exists.'})
                             } else {
 
-                                // hash password
-                                const hashed_password = bcrypt.hashSync(password, 10)
-
-                                // register user
-                                connection.execute('INSERT INTO users (email, username, password) VALUES (?, ?, ?)', [email, username, hashed_password], (err, result, fields) => {
-                                    if (err) {
-                                        console.log('Registration rejected: server error.')
-                                        console.error(err)
-                                        res.status(500).json({'error':'Server error.'})
-                                    } else {
-                                        console.log('Registration successful.')
-                                        res.status(200).send('Success.')
+                                // verify google recaptcha
+                                axios.get('https://www.google.com/recaptcha/api/siteverify', {
+                                    params: {
+                                        secret: process.env.GOOGLE_RECAPTCHA_SECRET || null,
+                                        response: recaptcha_response,
+                                        remoteip: req.connection.remoteAddress
                                     }
+                                }).then(response => {
+
+                                    if (typeof response.data.success === 'undefined' || !response.data.success) {
+                                        res.status(400).json({'error':'Recaptcha failed.'})
+                                    } else if (response.data.score < 0.1) {
+                                        res.status(400).json({'error':'You appear to be a bot.'})
+                                    } else {
+
+                                        // hash password
+                                        const hashed_password = bcrypt.hashSync(password, 10)
+
+                                        // register user
+                                        connection.execute('INSERT INTO users (email, username, password) VALUES (?, ?, ?)', [email, username, hashed_password], (err, result, fields) => {
+                                            if (err) {
+                                                console.log('Registration rejected: server error.')
+                                                console.error(err)
+                                                res.status(500).json({'error':'Server error.'})
+                                            } else {
+                                                console.log('Registration successful.')
+                                                res.status(200).send('Success.')
+                                            }
+                                        })
+                                    }
+                                }).catch(err => {
+                                    console.error(err)
+                                    res.status(500).json({'error':'Server error 1.'})
                                 })
                             }
                         })

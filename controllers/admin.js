@@ -304,7 +304,7 @@ const getTags = (req, res, connection) => {
                     res.status(403).json({'error':'Forbidden.'})
                 } else {
 
-                    connection.query('SELECT id, enabled, name FROM tags ORDER BY name', (err, results) => {
+                    connection.query('SELECT t.id, t.enabled, t.name, (SELECT COUNT(*) FROM meal_tags WHERE tag_id = t.id AND meal_id IN (SELECT id FROM meals WHERE enabled = TRUE)) as count FROM tags t ORDER BY t.name', (err, results) => {
                         if (err) {
                             console.error(err)
                             res.status(500).json({'error':'Server error.'})
@@ -468,7 +468,7 @@ const getTypes = (req, res, connection) => {
                     res.status(403).json({'error':'Forbidden.'})
                 } else {
 
-                    connection.query('SELECT id, enabled, name FROM types ORDER BY name', (err, results) => {
+                    connection.query('SELECT t.id, t.enabled, t.name, (SELECT COUNT(*) FROM meal_types WHERE type_id = t.id AND meal_id IN (SELECT id FROM meals WHERE enabled = TRUE)) as count FROM types t ORDER BY t.name', (err, results) => {
                         if (err) {
                             console.error(err)
                             res.status(500).json({'error':'Server error.'})
